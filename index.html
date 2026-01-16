@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>忍たまキャラ登場回検索</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        :root {
+            --main-green: #4CAF50;
+            --bg-gray: #f9f9f9;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2e7d32;
+            border-bottom: 2px solid var(--main-green);
+            padding-bottom: 10px;
+        }
+
+        .search-box {
+            background: var(--bg-gray);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .filter-group {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .accordion {
+            margin-top: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .accordion-header {
+            background-color: #eee;
+            color: #333;
+            cursor: pointer;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            font-size: 15px;
+            font-weight: bold;
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.3s;
+        }
+
+        .accordion-header:hover {
+            background-color: #e0e0e0;
+        }
+
+        .accordion-content {
+            padding: 10px 18px;
+            display: none;
+            background-color: #fff;
+        }
+
+        .group-header {
+            font-weight: bold;
+            margin-top: 10px;
+            padding: 4px 0;
+            color: #1b5e20;
+            border-bottom: 1px solid #eee;
+        }
+
+        label {
+            display: block;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+
+        #searchBtn {
+            display: block;
+            width: 100%;
+            background-color: var(--main-green);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+
+        #searchBtn:hover {
+            background-color: #45a049;
+        }
+
+        .episode-card {
+            border: 1px solid var(--border-color);
+            border-left: 6px solid var(--main-green);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .card-header {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .card-title {
+            font-size: 1.15em;
+            font-weight: bold;
+            color: #111;
+        }
+
+        .card-detail {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #eee;
+            font-size: 0.95em;
+            white-space: pre-wrap;
+        }
+
+        .memo-line {
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        #backToTop {
+            display: none;
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background-color: var(--main-green);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>忍たまキャラ登場回検索</h1>
+
+    <div class="search-box">
+        <input type="text" id="keyword" placeholder="キャラ名、あらすじ、メモから検索">
+
+        <div class="filter-group">
+            <strong>媒体：</strong>
+            <label><input type="radio" name="media" value="原作" checked> 原作</label>
+            <label><input type="radio" name="media" value="アニメ"> アニメ</label>
+            <label><input type="radio" name="media" value="絵本"> 絵本</label>
+        </div>
+
+        <div class="filter-group">
+            <strong>あらすじ表示：</strong>
+            <label><input type="radio" name="summary" value="無" checked> 無</label>
+            <label><input type="radio" name="summary" value="有"> 有</label>
+        </div>
+
+        <div class="filter-group">
+            <strong>メモ表示：</strong>
+            <label><input type="radio" name="memo" value="無" checked> 無</label>
+            <label><input type="radio" name="memo" value="有"> 有</label>
+        </div>
+
+        <p style="font-size: 0.85em; color: #666; margin-bottom: 5px;">▼ キャラクターを選択して検索（複数選択可）</p>
+        <div class="accordion" id="charAccordion">
+            <div class="accordion-item"><button class="accordion-header">一年生</button><div class="accordion-content" id="group-一年生"></div></div>
+            <div class="accordion-item"><button class="accordion-header">二年生</button><div class="accordion-content" id="group-二年生"></div></div>
+            <div class="accordion-item"><button class="accordion-header">三年生</button><div class="accordion-content" id="group-三年生"></div></div>
+            <div class="accordion-item"><button class="accordion-header">四年生</button><div class="accordion-content" id="group-四年生"></div></div>
+            <div class="accordion-item"><button class="accordion-header">五年生</button><div class="accordion-content" id="group-五年生"></div></div>
+            <div class="accordion-item"><button class="accordion-header">六年生</button><div class="accordion-content" id="group-六年生"></div></div>
+            <div class="accordion-item"><button class="accordion-header">くの一</button><div class="accordion-content" id="group-くの一"></div></div>
+            <div class="accordion-item"><button class="accordion-header">忍術学園関係</button><div class="accordion-content" id="group-忍術学園関係"></div></div>
+            <div class="accordion-item"><button class="accordion-header">ドクタケ城</button><div class="accordion-content" id="group-ドクタケ城"></div></div>
+            <div class="accordion-item"><button class="accordion-header">ドクたま</button><div class="accordion-content" id="group-ドクたま"></div></div>
+            <div class="accordion-item"><button class="accordion-header">タソガレドキ城</button><div class="accordion-content" id="group-タソガレドキ城"></div></div>
+            <div class="accordion-item"><button class="accordion-header">兵庫水軍</button><div class="accordion-content" id="group-兵庫水軍"></div></div>
+            <div class="accordion-item"><button class="accordion-header">その他</button><div class="accordion-content" id="group-その他"></div></div>
+        </div>
+    </div>
+
+    <button id="searchBtn">この条件で検索する</button>
+
+    <div id="result-container"></div>
+
+    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="backToTop">TOP</button>
+
+<script>
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQE7ET0UfEFFEwYLmPCH_XGWG-6-EfJQq09tk6ItDNQXXML65uc6UJjTKJnXopzWDTkbNeWPEvN7DiE/pub?output=csv";
+
+    let rows = [];
+    let charactersByClassAndGroup = {}; 
+
+    const groupSortOrder = {
+        '一年生': ['は組', 'い組', 'ろ組'], 
+        '二年生': ['い組', 'ろ組', 'は組'], 
+        '三年生': ['い組', 'ろ組', 'は組'], 
+        '四年生': ['い組', 'ろ組', 'は組'], 
+        '五年生': ['い組', 'ろ組', 'は組'], 
+        '六年生': ['い組', 'ろ組', 'は組'], 
+    };
+    
+    function extractGroup(className) {
+        if (!className) return '';
+        const match = className.match(/(い組|ろ組|は組)/);
+        return match ? match[0] : '';
+    }
+
+    function formatVolChap(value, unit) {
+        if (!value || String(value).trim() === '') return '';
+        const trimmed = String(value).trim();
+        if (unit === '巻') return `第${trimmed}巻`;
+        return /^\d+$/.test(trimmed) ? `第${trimmed}章` : trimmed;
+    }
+
+    async function loadData() {
+        try {
+            const res = await fetch(CSV_URL);
+            const text = await res.text();
+            const parsed = Papa.parse(text, { header: true, skipEmptyLines: true, encoding: 'Shift_JIS' });
+            if (!parsed.meta.fields || parsed.meta.fields.length < 5) return;
+            rows = parsed.data;
+            buildCharacterIndex();
+            buildAccordionLists();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function buildCharacterIndex() {
+        charactersByClassAndGroup = {};
+        rows.forEach(r => {
+            const cls = (r["キャラ分類"] || "").trim(); 
+            const name = (r["キャラ名"] || "").trim();
+            if (!cls || !name) return;
+            const group = extractGroup(r["クラス"]);
+            const key = (group && groupSortOrder[cls]) ? `${cls}/${group}` : cls; 
+            if (!charactersByClassAndGroup[key]) charactersByClassAndGroup[key] = new Set();
+            charactersByClassAndGroup[key].add(name);
+        });
+        for (const key in charactersByClassAndGroup) {
+            charactersByClassAndGroup[key] = [...charactersByClassAndGroup[key]].sort((a, b) => a.localeCompare(b, 'ja'));
+        }
+    }
+    
+    function buildAccordionLists() {
+        const categories = [...document.querySelectorAll('.accordion-content')].map(el => el.id.replace('group-', ''));
+        categories.forEach(cls => {
+            const container = document.getElementById(`group-${cls}`);
+            if (!container) return;
+            if (groupSortOrder[cls]) {
+                groupSortOrder[cls].forEach(group => {
+                    const names = charactersByClassAndGroup[`${cls}/${group}`];
+                    if (names) {
+                        const sampleRow = rows.find(r => r.キャラ分類 === cls && extractGroup(r.クラス) === group);
+                        container.insertAdjacentHTML("beforeend", `<div class="group-header">${sampleRow ? sampleRow.クラス : group}</div>`);
+                        names.forEach(name => {
+                            container.insertAdjacentHTML("beforeend", `<label><input type="checkbox" name="char" value="${name}"> ${name}</label>`);
+                        });
+                    }
+                });
+            } else {
+                const names = charactersByClassAndGroup[cls];
+                if (names) {
+                    names.forEach(name => {
+                        container.insertAdjacentHTML("beforeend", `<label><input type="checkbox" name="char" value="${name}"> ${name}</label>`);
+                    });
+                }
+            }
+        });
+    }
+
+    document.getElementById("searchBtn").addEventListener("click", function() {
+        const keyword = document.getElementById("keyword").value.trim().toLowerCase();
+        const media = document.querySelector("input[name='media']:checked").value;
+        const summaryOn = document.querySelector("input[name='summary']:checked").value === "有";
+        const memoOn = document.querySelector("input[name='memo']:checked").value === "有";
+        const selectedChars = [...document.querySelectorAll("input[name='char']:checked")].map(cb => cb.value);
+
+        const resultContainer = document.getElementById("result-container");
+        resultContainer.innerHTML = "検索中...";
+
+        const episodes = new Map();
+        rows.forEach(r => {
+            if (r["媒体"] !== media) return;
+            const id = `${r["巻数"]}-${r["章数"]}-${r["タイトル"]}`;
+            if (!episodes.has(id)) {
+                episodes.set(id, { info: r, chars: [] });
+            }
+            episodes.get(id).chars.push(r);
+        });
+
+        const filtered = [...episodes.values()].filter(ep => {
+            const episodeAllChars = ep.chars.map(c => c["キャラ名"]);
+            if (selectedChars.length > 0) {
+                if (!selectedChars.every(sc => episodeAllChars.includes(sc))) return false;
+            }
+            if (keyword) {
+                const searchTarget = `${episodeAllChars.join(" ")} ${ep.info["タイトル"]} ${ep.info["あらすじ"]} ${ep.info["メモ"]}`.toLowerCase();
+                if (!searchTarget.includes(keyword)) return false;
+            }
+            return true;
+        });
+
+        resultContainer.innerHTML = filtered.length === 0 ? "該当なし" : "";
+        
+        filtered.forEach(ep => {
+            const info = ep.info;
+            
+            // 初登場ラベル
+            const firstAppearanceTags = ep.chars
+                .filter(c => c["初登場回"] === '○' || c["初登場回"] === '△')
+                .map(c => `${c["キャラ名"]}${c["初登場回"] === '○' ? '初登場' : '名前のみ初登場'}`);
+            const firstAppearText = firstAppearanceTags.length > 0 ? `（${firstAppearanceTags.join('・')}）` : "";
+            
+            let details = "";
+            // あらすじ
+            if (summaryOn && info["あらすじ"]) {
+                details += `<div><strong>あらすじ:</strong> ${info["あらすじ"]}</div>`;
+            }
+            
+            // ★メモの表示ロジック（キャラ名：内容 の形式に変更）
+            if (memoOn) {
+                const memoLines = ep.chars
+                    .filter(c => c["メモ"] && c["メモ"].trim() !== "")
+                    .map(c => `<span class="memo-line">${c["キャラ名"]}：${c["メモ"]}</span>`);
+
+                if (memoLines.length > 0) {
+                    details += `<div style="margin-top:5px;"><strong>メモ:</strong><br>${memoLines.join('')}</div>`;
+                }
+            }
+
+            const volChap = `${formatVolChap(info["巻数"], '巻')} ${formatVolChap(info["章数"], '章')}`.trim();
+            resultContainer.insertAdjacentHTML("beforeend", `
+                <div class="episode-card">
+                    <div class="card-header">${volChap}</div>
+                    <div class="card-title">${info["タイトル"]}${firstAppearText}</div>
+                    ${details ? `<div class="card-detail">${details}</div>` : ""}
+                </div>
+            `);
+        });
+        window.scrollTo({ top: resultContainer.offsetTop - 20, behavior: 'smooth' });
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadData();
+        document.getElementById("charAccordion").addEventListener("click", e => {
+            const header = e.target.closest(".accordion-header");
+            if (!header) return;
+            const content = header.nextElementSibling;
+            const isOpen = content.style.display === "block";
+            document.querySelectorAll(".accordion-content").forEach(c => c.style.display = "none");
+            content.style.display = isOpen ? "none" : "block";
+        });
+        window.addEventListener("scroll", () => {
+            document.getElementById("backToTop").style.display = window.scrollY > 400 ? "block" : "none";
+        });
+    });
+</script>
+</body>
+</html>
