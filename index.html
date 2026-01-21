@@ -10,6 +10,7 @@
         body { font-family: sans-serif; line-height: 1.6; color: var(--text-color); max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; }
         h1 { text-align: center; color: #2e7d32; border-bottom: 2px solid var(--main-green); padding-bottom: 10px; }
         
+        /* 検索エリア */
         .search-box { background: var(--bg-gray); padding: 20px; border-radius: 8px; margin-bottom: 20px; }
         input[type="text"] { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 4px; box-sizing: border-box; font-size: 16px; }
         .filter-group { margin-bottom: 10px; display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
@@ -19,33 +20,30 @@
         .accordion-item { border-bottom: 1px solid var(--border-color); }
         .accordion-header { background: #eee; color: var(--text-color); cursor: pointer; padding: 12px; border: none; text-align: left; font-size: 15px; font-weight: bold; width: 100%; display: block; }
         .accordion-content { padding: 0; display: none; background-color: #fff; }
-        
         .group-header { font-weight: bold; padding: 8px 15px; color: #1b5e20; background-color: #f0f4f0; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #eee; }
-        .all-check { width: 20px; height: 20px; cursor: pointer; } 
-        
         .char-label { display: flex; align-items: center; padding: 10px 20px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
-        .char-label:hover { background-color: #f9f9f9; }
         .char-label input { margin-right: 15px; width: 18px; height: 18px; }
 
-        /* ボタンエリア */
+        /* ボタン */
         .button-area { display: flex; gap: 10px; margin: 20px 0; }
         #searchBtn { flex: 3; background-color: var(--main-green); color: white; padding: 15px; border: none; border-radius: 4px; font-size: 18px; font-weight: bold; cursor: pointer; }
         #clearBtn { flex: 1; background-color: #666; color: white; padding: 15px; border: none; border-radius: 4px; font-size: 14px; font-weight: bold; cursor: pointer; }
         
-        /* 検索結果 */
+        /* 結果カード */
         .episode-card { border: 1px solid var(--border-color); border-left: 6px solid var(--main-green); padding: 15px; margin-bottom: 15px; border-radius: 4px; background: #fff; }
-        .card-header { font-size: 0.85em; color: #666; }
         .card-title { font-size: 1.1em; font-weight: bold; margin: 5px 0; }
-        .card-detail { margin-top: 10px; padding: 10px; border-top: 1px dashed #eee; font-size: 0.95em; background: #fafafa; }
-        
+        .card-detail { margin-top: 10px; padding: 10px; border-top: 1px dashed #eee; font-size: 0.95em; background: #fafafa; white-space: pre-wrap; }
         .user-memo-container { margin-top: 10px; padding: 10px; background: var(--accent-green); border-radius: 4px; }
-        .user-memo-container textarea { width: 100%; height: 70px; border: 1px solid #fff; border-radius: 4px; padding: 8px; box-sizing: border-box; font-size: 0.9em; }
+        .user-memo-container textarea { width: 100%; height: 70px; border: 1px solid #fff; border-radius: 4px; padding: 8px; box-sizing: border-box; font-family: inherit; }
 
-        /* メモ管理エリア（最下部） */
-        .admin-area { background: #f0f0f0; padding: 15px; border-radius: 8px; margin-top: 40px; text-align: center; font-size: 0.85em; border: 1px solid var(--border-color); }
-        .btn-small { padding: 8px 16px; margin: 5px; cursor: pointer; border-radius: 4px; border: 1px solid #ccc; background: #fff; }
+        /* フッターエリア */
+        .footer-area { background: #f9f9f9; padding: 20px; border-radius: 8px; margin-top: 50px; border: 1px solid var(--border-color); font-size: 0.85em; color: #555; }
+        .footer-section { margin-bottom: 15px; }
+        .footer-section strong { color: #2e7d32; display: block; margin-bottom: 5px; }
+        .footer-section ul { padding-left: 18px; margin: 5px 0; }
+        .btn-small { padding: 8px 15px; margin: 5px 2px; cursor: pointer; border-radius: 4px; border: 1px solid #ccc; background: #fff; font-size: 0.9em; font-weight: bold; }
 
-        #backToTop { display: none; position: fixed; bottom: 25px; right: 25px; background-color: var(--main-green); color: white; border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; z-index: 1000; }
+        #backToTop { display: none; position: fixed; bottom: 25px; right: 25px; background-color: var(--main-green); color: white; border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; z-index: 1000; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -54,20 +52,17 @@
 
     <div class="search-box">
         <input type="text" id="keyword" placeholder="タイトルやメモの内容で検索">
-
         <div class="filter-group">
             <strong>媒体：</strong>
             <label><input type="radio" name="media" value="原作" checked> 原作</label>
             <label><input type="radio" name="media" value="アニメ"> アニメ</label>
             <label><input type="radio" name="media" value="絵本"> 絵本</label>
         </div>
-
         <div class="filter-group">
             <strong>あらすじ：</strong>
             <label><input type="radio" name="summary" value="無" checked> 無</label>
             <label><input type="radio" name="summary" value="有"> 有</label>
         </div>
-
         <div class="accordion" id="charAccordion"></div>
     </div>
 
@@ -78,12 +73,51 @@
 
     <div id="result-container"></div>
 
-    <div class="admin-area">
-        <strong>データ管理（メモのバックアップ）：</strong><br>
-        <button class="btn-small" onclick="exportUserMemos()">💾 保存（ファイルをダウンロード）</button>
-        <button class="btn-small" onclick="document.getElementById('importFile').click()">📂 復元（ファイルを読み込み）</button>
-        <input type="file" id="importFile" style="display:none" onchange="importUserMemos(event)">
-    </div>
+    <footer class="footer-area">
+        <div class="footer-section">
+            <strong>データ管理（メモのバックアップ）</strong>
+            <p>記入したメモはお使いのブラウザ内に自動保存されます。<br>ブラウザのキャッシュ削除等を行う際は、以下のボタンから保存・復元してください。</p>
+            <div style="margin-top: 10px;">
+                <button class="btn-small" onclick="exportUserMemos()">💾 ファイルを保存</button>
+                <button class="btn-small" onclick="document.getElementById('importFile').click()">📂 ファイルを読み込み</button>
+                <input type="file" id="importFile" style="display:none" onchange="importUserMemos(event)">
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; border-top: 1px solid #eee; padding-top: 15px;">
+            <a href="javascript:void(0)" id="about-link" onclick="document.getElementById('about-site-content').style.display='block'; this.style.display='none'" style="color: #999; text-decoration: none; font-size: 0.9em;">▶ このサイトについて（使い方・連絡先）</a>
+            
+            <div id="about-site-content" style="display:none; text-align: left; background: #fff; padding: 15px; border: 1px solid #ddd; border-radius: 4px; margin-top: 10px;">
+                <div class="footer-section">
+                    <strong>■ メモ欄について</strong>
+                    <ul>
+                        <li>記入したメモはお使いのブラウザ内に自動保存されます。</li>
+                        <li>ブラウザのデータ削除や端末の変更を行うとメモが消えてしまいますが、上のボタンからファイルの保存・復元が可能です。</li>
+                        <li>入力したメモが他のユーザーに見られたりすることはありません。</li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <strong>■ 検索について</strong>
+                    <ul>
+                        <li>複数の条件を選択した場合、すべてに一致する結果（AND検索）が表示されます。</li>
+                        <li>一覧にないキャラクターや、自分が書いたメモの内容も検索窓から探せます。</li>
+                        <li>スペースで区切って検索することも可能です。</li>
+                    </ul>
+                </div>
+
+                <div class="footer-section" style="border-top: 1px dashed #ccc; padding-top: 10px; color: #666;">
+                    <strong>■ このサイトについて</strong>
+                    <p style="margin-bottom: 10px;">個人が作成した非公式ファンサイトです。<br>版権元・関係各社様とは一切関係ありません。</p>
+                    <p>修正点やご意見など：<br>
+                    Wavebox：<a href="https://wavebox.me/wave/272gqicbsuqjrf0t/" target="_blank" style="color: #2e7d32; font-weight: bold;">メッセージを送る</a></p>
+                    <p style="text-align: right; font-weight: bold; margin-top: 10px; color: #333;">サイト管理人：なにぬねの</p>
+                    
+                    <button class="btn-small" onclick="document.getElementById('about-site-content').style.display='none'; document.getElementById('about-link').style.display='inline'" style="display: block; margin: 10px auto 0; font-size: 0.8em; color: #888;">× 説明を閉じる</button>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="backToTop">↑</button>
 
@@ -100,12 +134,9 @@
     };
     const classCategories = ["一年生", "二年生", "三年生", "四年生", "五年生", "六年生", "くの一", "忍術学園関係", "ドクタケ城", "ドクたま", "タソガレドキ城", "兵庫水軍", "その他"];
 
-    // チェックをすべて外す関数
     function clearAllChecks() {
-        if(!confirm("選択したキャラクターをすべて解除しますか？")) return;
-        document.querySelectorAll('input[name="char"], .class-unit-check').forEach(chk => {
-            chk.checked = false;
-        });
+        if(!confirm("選択をすべて解除しますか？")) return;
+        document.querySelectorAll('input[name="char"], .class-unit-check').forEach(chk => chk.checked = false);
     }
 
     function extractGroup(className) {
@@ -141,8 +172,8 @@
             try {
                 userMemos = JSON.parse(e.target.result);
                 localStorage.setItem('nintama_free_memos', JSON.stringify(userMemos));
-                alert('メモを復元しました。');
-            } catch (err) { alert('ファイル形式エラー'); }
+                alert('メモを復元しました。検索すると反映されます。');
+            } catch (err) { alert('形式エラー'); }
         };
         reader.readAsText(file);
     }
@@ -188,10 +219,11 @@
             const container = document.getElementById(`group-${cls}`);
             if (!container) return;
             if (groupSortOrder[cls]) {
+                const displayClass = cls.replace("生", ""); 
                 groupSortOrder[cls].forEach(group => {
                     const names = [...(charactersByClassAndGroup[`${cls}/${group}`] || [])].sort((a,b)=>a.localeCompare(b,'ja'));
                     if (names.length > 0) {
-                        container.insertAdjacentHTML("beforeend", `<div class="group-header"><input type="checkbox" class="all-check class-unit-check"> ${cls}${group}</div>
+                        container.insertAdjacentHTML("beforeend", `<div class="group-header"><input type="checkbox" class="all-check class-unit-check"> ${displayClass}${group}</div>
                             <div class="class-chars">${names.map(name => `<label class="char-label"><input type="checkbox" name="char" value="${name}"> ${name}</label>`).join('')}</div>`);
                     }
                 });
@@ -233,10 +265,7 @@
             const episodeAllChars = ep.chars.map(c => c["キャラ名"]);
             const currentMemo = userMemos[id] || "";
 
-            if (selectedChars.length > 0) {
-                if (!selectedChars.every(sc => episodeAllChars.includes(sc))) return;
-            }
-            
+            if (selectedChars.length > 0 && !selectedChars.every(sc => episodeAllChars.includes(sc))) return;
             if (keyword) {
                 const searchTarget = `${episodeAllChars.join(" ")} ${info["タイトル"]} ${info["あらすじ"]} ${currentMemo}`.toLowerCase();
                 if (!searchTarget.includes(keyword)) return;
@@ -249,9 +278,9 @@
             
             resultContainer.insertAdjacentHTML("beforeend", `
                 <div class="episode-card">
-                    <div class="card-header">${volChap}</div>
+                    <div style="font-size:0.85em; color:#666;">${volChap}</div>
                     <div class="card-title">${info["タイトル"]}</div>
-                    ${firsts.length > 0 ? `<div class="first-appearance-line" style="font-size:0.9em; font-weight:bold;">初登場：${firsts.join('・')}</div>` : ''}
+                    ${firsts.length > 0 ? `<div style="font-size:0.9em; font-weight:bold; margin-bottom:5px;">初登場：${firsts.join('・')}</div>` : ''}
                     ${summaryOn ? `<div class="card-detail"><strong>あらすじ:</strong><br>${info["あらすじ"] || 'なし'}</div>` : ""}
                     <div class="user-memo-container">
                         <textarea oninput="saveMemo('${id}', this.value)" placeholder="自由にメモを記入">${currentMemo}</textarea>
